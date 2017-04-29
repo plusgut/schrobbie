@@ -1,6 +1,7 @@
-var ON  = 0; // Needs to be inverted, because 0 is not holdable at espruino
-var OFF = 1;
+var ON  = 1; // Needs to be inverted, because 0 is not holdable at espruino
+var OFF = 0;
 
+var WRITE_ALLWAYS = 1;
 var RUNLOOP_FREQUENCE = 5;
 
 function Pin(pin) {
@@ -16,8 +17,12 @@ var pins = {
   M2IN2: new Pin(D29),
 };
 
+pins.M1IN2.pwm = 0;
+
 function init() {
+  writePins();
   readPins();
+  setInterval(readPins, 1000);
   setInterval(runloop, RUNLOOP_FREQUENCE);
 }
 
@@ -30,6 +35,16 @@ function readPins() {
   }
 }
 
+function writePins() {
+  for(var type in pins) {
+    if(pins.hasOwnProperty(type)) {
+      var pin = pins[type];
+      digitalWrite(pin.obj, pin.value);
+      //console.log(type, pin.value);
+    }
+  }
+}
+
 var increment = 0;
 
 function runloop() {
@@ -37,8 +52,10 @@ function runloop() {
     if(pins.hasOwnProperty(type)) {
       var pin = pins[type];
       var newValue = getNewValue(pin);
-      console.log(newValue, newValue !== pin.value);
-      if(newValue !== pin.value) {
+
+      if(newValue || newValue !== pin.value || WRITE_ALLWAYS) {
+//      if(newValue !== pin.value) {
+        console.log('CHANGE!', type, newValue);
         digitalWrite(pin.obj, newValue);
         pin.value = newValue;
       }
