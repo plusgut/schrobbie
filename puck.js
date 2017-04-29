@@ -1,7 +1,7 @@
 var ON  = 0; // Needs to be inverted, because 0 is not holdable at espruino
 var OFF = 1;
 
-var RUNLOOP_FREQUENCE = 1;
+var RUNLOOP_FREQUENCE = 5;
 
 function Pin(pin) {
   this.obj = pin;
@@ -17,18 +17,17 @@ var pins = {
 };
 
 function init() {
-  var allPins = [];
+  readPins();
+  setInterval(runloop, RUNLOOP_FREQUENCE);
+}
 
+function readPins() {
   for(var type in pins) {
     if(pins.hasOwnProperty(type)) {
       var pin = pins[type];
-      allPins.push(pin);
       console.log(type, digitalRead(pin.obj));
     }
   }
-
-  setInterval(runloop, RUNLOOP_FREQUENCE);
-
 }
 
 var increment = 0;
@@ -50,9 +49,9 @@ function runloop() {
 
 function getNewValue(pin) {
   if(pin.pwm && increment % pin.pwm === 0) {
-    return OFF;
-  } else {
     return ON;
+  } else {
+    return OFF;
   }
 }
 
