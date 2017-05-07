@@ -3,7 +3,9 @@
 var Joystick     = require('joystick');
 var stick        = new Joystick(0, 3500, 350);
 
-const RUNLOOP_INTERVAL = 300;
+const RUNLOOP_INTERVAL = 1000;
+const OFF = 0;
+const ON = 1;
 var state = {};
 
 const PINS = {
@@ -40,9 +42,9 @@ function getOtherDirection(direction) {
 
 function getValue(value) {
   if(value === 0) {
-    return 0;
+    return OFF;
   } else {
-    return 1;
+    return ON;
   }
 }
 
@@ -55,8 +57,22 @@ function writeCommand(pin, value) {
 }
 
 function saveState(motor, direction, value) {
-  state[getPin(motor, direction)] = value;
-  state[getPin(motor, getOtherDirection(direction))] = 0;
+  var command = '';
+  var pin = getPin(motor, direction); 
+  var otherPin = getPin(motor, getOtherDirection(direction));
+
+  if(value !== state[pin]) {
+    state[pin] = value;
+    command += writeCommand(pin, value); 
+  }
+  if(state[otherPin] !== OFF) {
+    state[otherPin] = OFF;
+    command += writeCommand(otherPin, OFF);                     
+  }
+
+  if(command !== '') {
+    console.log(command);
+  }
 }
 
 stick.on('axis', (evt) => {
@@ -74,7 +90,7 @@ setInterval(() => {
       result += writeCommand(pin, state[pin]);
     }
   }
-  console.log(result);
+ // console.log(result);
 },RUNLOOP_INTERVAL);
 
 function init() {
@@ -87,4 +103,4 @@ function init() {
   console.log(result);
 }
 
-//init();
+init();
