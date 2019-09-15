@@ -4,6 +4,10 @@
 #include <linux/joystick.h>
 #include <wiringPi.h>
 
+
+const int PWM_MIN_VALUE = 700;
+const int PWM_MAX_VALUE = 2000;
+
 int read_event(int fd, struct js_event *event)
 {
     ssize_t bytes;
@@ -24,12 +28,19 @@ float getPercentage(int value)
 
 int getPwmValue(int value) {
     float percentage = getPercentage(value);
-    int min_value = 700;
-    int max_value = 2000;
-    int grow_value = max_value - min_value;
 
-    return min_value + percentage * grow_value;
+    return PWM_MIN_VALUE + percentage * (PWM_MAX_VALUE - PWM_MIN_VALUE);
 }
+
+void armEsc(int pin) {
+    printf('Arming procedure for %d', pin);
+    pwmWrite(pin, PWM_MIN_VALUE);
+    delay(12000)
+    pwmWrite(pin, 0);
+    delay(2000);
+    pwmWrite(PWM_MIN_VALUE);
+}
+
 int main()
 {
     struct js_event event;
@@ -54,7 +65,9 @@ int main()
     pinMode(left_pin, PWM_OUTPUT);
     pinMode(right_pin, PWM_OUTPUT);
 
-    /* This loop will exit if the controller is unplugged. */
+    armEsc(left_pin);
+    armEsc(right_pin);
+
     while (read_event(js, &event) == 0)
     {
         if (event.type == JS_EVENT_AXIS)
@@ -62,11 +75,11 @@ int main()
             if (event.number == left_axis)
             {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-		pwmWrite(left_pin, getPwmValue(event.value));
+                pwmWrite(left_pin, getPwmValue(event.value));
             } else if (event.number == right_axis) {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-		pwmWrite(right_pin, getPwmValue(event.value));
-	    }
+                pwmWrite(right_pin, getPwmValue(event.value));
+            }
         }
     }
     close(js);
