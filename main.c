@@ -34,6 +34,9 @@ int getPwmValue(int value) {
 
 void armEsc(int pin) {
     printf("Arming procedure for %d\n", pin);
+    delay(2000);
+    pwmWrite(pin, PWM_MAX_VALUE);
+    delay(3000);
     pwmWrite(pin, PWM_MIN_VALUE);
     delay(12000);
     pwmWrite(pin, 0);
@@ -49,6 +52,7 @@ int main()
     const char *device = "/dev/input/js0";
 
     int js = open(device, O_RDONLY);
+
     int left_axis = 1;
     int right_axis = 4;
     int left_pin = 18;
@@ -68,8 +72,9 @@ int main()
 
     pinMode(left_pin, PWM_OUTPUT);
     pinMode(right_pin, PWM_OUTPUT);
+    pwmWrite(left_pin, 0);
+    pwmWrite(right_pin, 0);
 
-    printf("Arming starts\n");
     armEsc(left_pin);
     armEsc(right_pin);
 
