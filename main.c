@@ -1,5 +1,4 @@
-#include <fcntl.h>
-#include <stdlib.h>
+#include <fcntl.h>#include <stdlib.h>
 #include <stdio.h>
 #include <linux/joystick.h>
 #include <wiringPi.h>
@@ -45,7 +44,7 @@ void armEsc(int pin) {
 }
 
 int main()
-{ 
+{
     printf("Start \n");
 
     struct js_event event;
@@ -69,6 +68,10 @@ int main()
        printf("No wiring setup possible\n");
        return -2;
     }
+
+    pwmSetClock(400);
+    pwmSetRange(1024);
+    pwmSetMode(0);
 
     pinMode(left_pin, PWM_OUTPUT);
     pinMode(right_pin, PWM_OUTPUT);
