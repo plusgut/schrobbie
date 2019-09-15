@@ -33,16 +33,18 @@ int getPwmValue(int value) {
 }
 
 void armEsc(int pin) {
-    printf('Arming procedure for %d', pin);
+    printf("Arming procedure for %d\n", pin);
     pwmWrite(pin, PWM_MIN_VALUE);
-    delay(12000)
+    delay(12000);
     pwmWrite(pin, 0);
     delay(2000);
-    pwmWrite(PWM_MIN_VALUE);
+    pwmWrite(pin, PWM_MIN_VALUE);
 }
 
 int main()
-{
+{ 
+    printf("Start \n");
+
     struct js_event event;
     const char *device = "/dev/input/js0";
 
@@ -54,19 +56,24 @@ int main()
 
     if (js == -1)
     {
-        return -1;
+       printf("No joystick \n");
+       return -1;
     }
 
     if (wiringPiSetup () == -1)
     {
+       printf("No wiring setup possible\n");
        return -2;
     }
 
     pinMode(left_pin, PWM_OUTPUT);
     pinMode(right_pin, PWM_OUTPUT);
 
+    printf("Arming starts\n");
     armEsc(left_pin);
     armEsc(right_pin);
+
+    printf("Arming complete\n");
 
     while (read_event(js, &event) == 0)
     {
