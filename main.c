@@ -8,14 +8,16 @@ int read_event(int fd, struct js_event *event)
 
     bytes = read(fd, event, sizeof(*event));
 
-    if (bytes == sizeof(*event))
+    if (bytes == sizeof(*event)) {
         return 0;
+    }
 
     return -1;
 }
 
-float getPercentage(int value) {
-	return (float)(value * -1) / (float)32767;
+float getPercentage(int value)
+{
+    return (float)(value * -1) / (float)32767;
 }
 
 int main()
@@ -28,20 +30,23 @@ int main()
     int right_axis = 4;
 
     if (js == -1)
+    {
         return -1;
+    }
 
     /* This loop will exit if the controller is unplugged. */
     while (read_event(js, &event) == 0)
     {
-        if (event.type == JS_EVENT_AXIS && event.value <= 0) {
-           if (event.number == left_axis) {
-		   printf("axis: %d value: %f\n", event.number, getPercentage(event.value));
+        if (event.type == JS_EVENT_AXIS && event.value <= 0)
+        {
+            if (event.number == left_axis)
+            {
+                printf("axis: %d value: %f\n", event.number, getPercentage(event.value));
 
-	   } else if (event.number == right_axis) {
-		   printf("axis: %d value: %f\n", event.number, getPercentage(event.value));
-  
-	   } 
-       	}
+            } else if (event.number == right_axis) {
+                printf("axis: %d value: %f\n", event.number, getPercentage(event.value));
+            }
+        }
     }
     close(js);
 
