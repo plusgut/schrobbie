@@ -1,5 +1,4 @@
-#include <fcntl.h>
-#include <stdlib.h>
+#include <fcntl.h>#include <stdlib.h>
 #include <stdio.h>
 #include <linux/joystick.h>
 #include <wiringPi.h>
@@ -33,20 +32,26 @@ int getPwmValue(int value) {
 }
 
 void armEsc(int pin) {
-    printf('Arming procedure for %d', pin);
+    printf("Arming procedure for %d\n", pin);
+    delay(2000);
+    pwmWrite(pin, PWM_MAX_VALUE);
+    delay(3000);
     pwmWrite(pin, PWM_MIN_VALUE);
-    delay(12000)
+    delay(12000);
     pwmWrite(pin, 0);
     delay(2000);
-    pwmWrite(PWM_MIN_VALUE);
+    pwmWrite(pin, PWM_MIN_VALUE);
 }
 
 int main()
 {
+    printf("Start \n");
+
     struct js_event event;
     const char *device = "/dev/input/js0";
 
     int js = open(device, O_RDONLY);
+
     int left_axis = 1;
     int right_axis = 4;
     int left_pin = 18;
@@ -54,19 +59,29 @@ int main()
 
     if (js == -1)
     {
-        return -1;
+       printf("No joystick \n");
+       return -1;
     }
 
     if (wiringPiSetup () == -1)
     {
+       printf("No wiring setup possible\n");
        return -2;
     }
 
+    pwmSetClock(400);
+    pwmSetRange(1024);
+    pwmSetMode(0);
+
     pinMode(left_pin, PWM_OUTPUT);
     pinMode(right_pin, PWM_OUTPUT);
+    pwmWrite(left_pin, 0);
+    pwmWrite(right_pin, 0);
 
     armEsc(left_pin);
     armEsc(right_pin);
+
+    printf("Arming complete\n");
 
     while (read_event(js, &event) == 0)
     {
