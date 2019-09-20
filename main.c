@@ -70,7 +70,7 @@ int main()
        return -1;
     }
 
-    if (wiringPiSetup () == -1)
+    if (wiringPiSetup() == -1)
     {
        printf("No wiring setup possible\n");
        return -2;
