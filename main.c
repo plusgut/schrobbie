@@ -82,7 +82,7 @@ int main()
 
     pinMode(ESC_LEFT_PIN, PWM_OUTPUT);
     pinMode(ESC_RIGHT_PIN, PWM_OUTPUT);
-    setPwmValueBoth(PWM_MODE_MS);
+    setPwmValueBoth(0);
 
     armEsc();
 
