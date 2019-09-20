@@ -76,13 +76,13 @@ int main()
        return -2;
     }
 
-    pwmSetClock(192);
-    pwmSetRange(2000);
+    pwmSetClock(1920);
+    pwmSetRange(200);
     pwmSetMode(0);
 
     pinMode(ESC_LEFT_PIN, PWM_OUTPUT);
     pinMode(ESC_LEFT_PIN, PWM_OUTPUT);
-    setPwmValueBoth(PWM_MODE_MS);
+    pwmSetMode(PWM_MODE_MS);
 
     armEsc();
 
