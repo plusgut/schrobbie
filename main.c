@@ -45,7 +45,6 @@ void setPwmValueBoth(int value)
 
 void armEsc() {
     printf("Arming procedure is running\n");
-    delay(2000);
     printf("Setting to max value\n");
     setPwmValueBoth(PWM_MAX_VALUE);
     delay(3000);
@@ -70,12 +69,6 @@ int main()
     int left_axis = 1;
     int right_axis = 4;
 
-    if (js == -1)
-    {
-       printf("No joystick \n");
-       return -1;
-    }
-
     if (!bcm2835_init())
     {
        printf("No wiring setup possible\n");
@@ -86,34 +79,45 @@ int main()
     bcm2835_gpio_fsel(ESC_RIGHT_PIN, BCM2835_GPIO_FSEL_ALT5);
 
     bcm2835_pwm_set_clock(CLOCK);
-    bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
-    bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
 
     bcm2835_pwm_set_mode(PWM_CHANNEL_RIGHT, 1, 1);
     bcm2835_pwm_set_range(PWM_CHANNEL_RIGHT, RANGE);
 
-    printf("Zeroing previous state\n");
-    setPwmValueBoth(0);
+    bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
+    bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
 
+    printf("Zeroing previous state\n");
     armEsc();
 
     printf("Arming complete\n");
 
-    while (read_event(js, &event) == 0)
+    while (1)
     {
-        if (event.type == JS_EVENT_AXIS && event.value <= 0)
+        int js = open(device, O_RDONLY);
+
+        if (js == -1)
         {
-            if (event.number == left_axis)
+            printf("No joystick yet, will try again later\n");
+            delay(1000);
+        } else {
+            while (read_event(js, &event) == 0)
             {
-                printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-                bcm2835_pwm_set_data(PWM_CHANNEL_LEFT, getPwmValue(event.value));
-            } else if (event.number == right_axis) {
-                printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-                bcm2835_pwm_set_data(PWM_CHANNEL_RIGHT, getPwmValue(event.value));
+                if (event.type == JS_EVENT_AXIS && event.value <= 0)
+                {
+                    if (event.number == left_axis)
+                    {
+                        printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
+                        bcm2835_pwm_set_data(PWM_CHANNEL_LEFT, getPwmValue(event.value));
+                    } else if (event.number == right_axis) {
+                        printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
+                        bcm2835_pwm_set_data(PWM_CHANNEL_RIGHT, getPwmValue(event.value));
+                    }
+                }
             }
+            printf("Joystick disconnected \n");
+            close(js);
+
+            return 0;
         }
     }
-    close(js);
-
-    return 0;
 }
