@@ -7,11 +7,11 @@
 const int PWM_MIN_VALUE = 30;
 const int PWM_MAX_VALUE = 700;
 const int ESC_LEFT_PIN = 18;
-const int ESC_RIGHT_PIN = 10;
+const int ESC_RIGHT_PIN = 19;
 const int PWM_CHANNEL_LEFT = 0;
 const int PWM_CHANNEL_RIGHT = 1;
 const int RANGE = 1024;
-const int CLOCK = 1200000 / 140;
+const int CLOCK = BCM2835_PWM_CLOCK_DIVIDER_256 + BCM2835_PWM_CLOCK_DIVIDER_128;
 
 int read_event(int fd, struct js_event *event)
 {
