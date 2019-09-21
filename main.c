@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <linux/joystick.h>
-#include <wiringPi.h>
+#include <bcm2835.h>
 
-
-const int PWM_MIN_VALUE = 700;
-const int PWM_MAX_VALUE = 2000;
-const int ESC_LEFT_PIN = 1; // 18;
+const int PWM_MIN_VALUE = 30;
+const int PWM_MAX_VALUE = 700;
+const int ESC_LEFT_PIN = RPI_GPIO_P1_12; // 1; // 18;
 const int ESC_RIGHT_PIN = 24; // 19;
-
+const int PWM_CHANNEL = 0;
+const int RANGE = 1024;
+const int CLOCK = 1200000 / 70;
 int read_event(int fd, struct js_event *event)
 {
     ssize_t bytes;
@@ -36,17 +37,19 @@ int getPwmValue(int value) {
 
 void setPwmValueBoth(int value)
 {
-    pwmWrite(ESC_LEFT_PIN, value);
-    pwmWrite(ESC_RIGHT_PIN, value);
+    bcm2835_pwm_set_data(PWM_CHANNEL, value);
 }
 
 void armEsc() {
     printf("Arming procedure is running\n");
     delay(2000);
+    printf("Setting to max value\n");
     setPwmValueBoth(PWM_MAX_VALUE);
     delay(3000);
+    printf("Setting to min pulse\n");
     setPwmValueBoth(PWM_MIN_VALUE);
     delay(12000);
+    printf("Zeroing again\n");
     setPwmValueBoth(0);
     delay(2000);
     setPwmValueBoth(PWM_MIN_VALUE);
@@ -70,18 +73,19 @@ int main()
        return -1;
     }
 
-    if (wiringPiSetup() == -1)
+    if (!bcm2835_init())
     {
        printf("No wiring setup possible\n");
        return -2;
     }
 
-    pwmSetClock(1920);
-    pwmSetRange(200);
-    pwmSetMode(PWM_MODE_MS);
+    bcm2835_gpio_fsel(ESC_LEFT_PIN, BCM2835_GPIO_FSEL_ALT5);
 
-    pinMode(ESC_LEFT_PIN, PWM_OUTPUT);
-    pinMode(ESC_RIGHT_PIN, PWM_OUTPUT);
+    bcm2835_pwm_set_clock(1200000 / 140 );
+    bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
+    bcm2835_pwm_set_range(PWM_CHANNEL, RANGE);
+
+    printf("Zeroing previous state\n");
     setPwmValueBoth(0);
 
     armEsc();
@@ -95,10 +99,10 @@ int main()
             if (event.number == left_axis)
             {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-                pwmWrite(ESC_LEFT_PIN, getPwmValue(event.value));
+                bcm2835_pwm_set_data(PWM_CHANNEL, getPwmValue(event.value));
             } else if (event.number == right_axis) {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-                pwmWrite(ESC_LEFT_PIN, getPwmValue(event.value));
+ //               pwmWrite(ESC_LEFT_PIN, getPwmValue(event.value));
             }
         }
     }
