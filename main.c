@@ -6,11 +6,13 @@
 
 const int PWM_MIN_VALUE = 30;
 const int PWM_MAX_VALUE = 700;
-const int ESC_LEFT_PIN = RPI_GPIO_P1_12; // 1; // 18;
-const int ESC_RIGHT_PIN = 24; // 19;
-const int PWM_CHANNEL = 0;
+const int ESC_LEFT_PIN = 18;
+const int ESC_RIGHT_PIN = 19;
+const int PWM_CHANNEL_LEFT = 0;
+const int PWM_CHANNEL_RIGHT = 1;
 const int RANGE = 1024;
-const int CLOCK = 1200000 / 70;
+const int CLOCK = 1200000 / 140;
+
 int read_event(int fd, struct js_event *event)
 {
     ssize_t bytes;
@@ -37,7 +39,8 @@ int getPwmValue(int value) {
 
 void setPwmValueBoth(int value)
 {
-    bcm2835_pwm_set_data(PWM_CHANNEL, value);
+    bcm2835_pwm_set_data(PWM_CHANNEL_LEFT, value);
+    bcm2835_pwm_set_data(PWM_CHANNEL_RIGHT, value);
 }
 
 void armEsc() {
@@ -80,10 +83,14 @@ int main()
     }
 
     bcm2835_gpio_fsel(ESC_LEFT_PIN, BCM2835_GPIO_FSEL_ALT5);
+    bcm2835_gpio_fsel(ESC_RIGHT_PIN, BCM2835_GPIO_FSEL_ALT5);
 
-    bcm2835_pwm_set_clock(1200000 / 140 );
-    bcm2835_pwm_set_mode(PWM_CHANNEL, 1, 1);
-    bcm2835_pwm_set_range(PWM_CHANNEL, RANGE);
+    bcm2835_pwm_set_clock(CLOCK);
+    bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
+    bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
+
+    bcm2835_pwm_set_mode(PWM_CHANNEL_RIGHT, 1, 1);
+    bcm2835_pwm_set_range(PWM_CHANNEL_RIGHT, RANGE);
 
     printf("Zeroing previous state\n");
     setPwmValueBoth(0);
@@ -99,10 +106,10 @@ int main()
             if (event.number == left_axis)
             {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
-                bcm2835_pwm_set_data(PWM_CHANNEL, getPwmValue(event.value));
+                bcm2835_pwm_set_data(PWM_CHANNEL_LEFT, getPwmValue(event.value));
             } else if (event.number == right_axis) {
                 printf("axis: %d value: %d\n", event.number, getPwmValue(event.value));
- //               pwmWrite(ESC_LEFT_PIN, getPwmValue(event.value));
+                bcm2835_pwm_set_data(PWM_CHANNEL_RIGHT, getPwmValue(event.value));
             }
         }
     }
