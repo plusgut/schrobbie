@@ -7,7 +7,7 @@
 const int PWM_MIN_VALUE = 30;
 const int PWM_MAX_VALUE = 700;
 const int ESC_LEFT_PIN = 18;
-const int ESC_RIGHT_PIN = 19;
+const int ESC_RIGHT_PIN = 10;
 const int PWM_CHANNEL_LEFT = 0;
 const int PWM_CHANNEL_RIGHT = 1;
 const int RANGE = 1024;
