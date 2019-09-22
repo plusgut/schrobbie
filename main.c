@@ -5,7 +5,7 @@
 #include <bcm2835.h>
 
 const int PWM_MIN_VALUE = 30;
-const int PWM_MAX_VALUE = 700;
+const int PWM_MAX_VALUE = 100;
 const int ESC_LEFT_PIN = 18;
 const int ESC_RIGHT_PIN = 19;
 const int PWM_CHANNEL_LEFT = 0;
@@ -83,6 +83,8 @@ int main()
     bcm2835_pwm_set_mode(PWM_CHANNEL_RIGHT, 1, 1);
     bcm2835_pwm_set_range(PWM_CHANNEL_RIGHT, RANGE);
 
+    delay(1000); // If delay between setting first and second pin is not given, than pwm doesnt work
+
     bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
     bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
 
@@ -100,6 +102,7 @@ int main()
             printf("No joystick yet, will try again later\n");
             delay(1000);
         } else {
+            printf("Joystick connected, ready to drive\n");
             while (read_event(js, &event) == 0)
             {
                 if (event.type == JS_EVENT_AXIS && event.value <= 0)
