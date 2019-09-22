@@ -12,6 +12,8 @@ const int PWM_CHANNEL_LEFT = 0;
 const int PWM_CHANNEL_RIGHT = 1;
 const int RANGE = 1024;
 const int CLOCK = BCM2835_PWM_CLOCK_DIVIDER_256 + BCM2835_PWM_CLOCK_DIVIDER_128;
+const int CALIBRATION_DELAY = 8000;
+const int ARMING_DELAY = 1000;
 
 int read_event(int fd, struct js_event *event)
 {
@@ -43,18 +45,23 @@ void setPwmValueBoth(int value)
     bcm2835_pwm_set_data(PWM_CHANNEL_RIGHT, value);
 }
 
-void armEsc() {
-    printf("Arming procedure is running\n");
+void calibrateEsc() {
+    printf("Calibration procedure is running\n");
     printf("Setting to max value\n");
     setPwmValueBoth(PWM_MAX_VALUE);
-    delay(3000);
+    delay(CALIBRATION_DELAY);
     printf("Setting to min pulse\n");
     setPwmValueBoth(PWM_MIN_VALUE);
-    delay(12000);
-    printf("Zeroing again\n");
-    setPwmValueBoth(0);
-    delay(2000);
+    delay(CALIBRATION_DELAY);
+}
+
+void armEsc() {
+    printf('Arming');
+    setPwmValueBoth(PWM_MAX_VALUE);
+    delay(CALIBRATION_DELAY);
+    printf("Setting to min pulse\n");
     setPwmValueBoth(PWM_MIN_VALUE);
+    delay(CALIBRATION_DELAY);
 }
 
 int main()
@@ -88,7 +95,7 @@ int main()
     bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
     bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
 
-    printf("Zeroing previous state\n");
+    calibrateEsc();
     armEsc();
 
     printf("Arming complete\n");
