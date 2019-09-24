@@ -4,12 +4,12 @@
 #include <linux/joystick.h>
 #include <bcm2835.h>
 
-const int PWM_MIN_VALUE = 30;
-const int PWM_MAX_VALUE = 100;
-const int ESC_LEFT_PIN = 18;
-const int ESC_RIGHT_PIN = 19;
-const int PWM_CHANNEL_LEFT = 0;
-const int PWM_CHANNEL_RIGHT = 1;
+const int PWM_MIN_VALUE = 33;
+const int PWM_MAX_VALUE = 50;
+const int ESC_LEFT_PIN = 19;
+const int ESC_RIGHT_PIN = 18;
+const int PWM_CHANNEL_LEFT = 1;
+const int PWM_CHANNEL_RIGHT = 0;
 const int RANGE = 1024;
 const int CLOCK = BCM2835_PWM_CLOCK_DIVIDER_256 + BCM2835_PWM_CLOCK_DIVIDER_128;
 const int CALIBRATION_DELAY = 8000;
@@ -56,7 +56,7 @@ void calibrateEsc() {
 }
 
 void armEsc() {
-    printf('Arming');
+    printf("Arming\n");
     setPwmValueBoth(PWM_MAX_VALUE);
     delay(CALIBRATION_DELAY);
     printf("Setting to min pulse\n");
@@ -70,8 +70,6 @@ int main()
 
     struct js_event event;
     const char *device = "/dev/input/js0";
-
-    int js = open(device, O_RDONLY);
 
     int left_axis = 1;
     int right_axis = 4;
@@ -95,8 +93,10 @@ int main()
     bcm2835_pwm_set_mode(PWM_CHANNEL_LEFT, 1, 1);
     bcm2835_pwm_set_range(PWM_CHANNEL_LEFT, RANGE);
 
-    calibrateEsc();
-    armEsc();
+    // calibrateEsc();
+    // armEsc();
+    setPwmValueBoth(PWM_MIN_VALUE);
+    delay(4000);
 
     printf("Arming complete\n");
 
@@ -131,3 +131,4 @@ int main()
         }
     }
 }
+
